@@ -199,7 +199,7 @@ function App() {
   const totalItens = carrinho.reduce((total, item) => total + item.quantidade, 0);
 
   const finalizarPedido = () => {
-    const numeroWhatsApp = "5538999383474";
+    const numeroWhatsApp = "5538998210980";
 
     let mensagem = `*NOVO PEDIDO*\n\n`;
     mensagem += `*Cliente:* ${dadosCliente.nome}\n`;
