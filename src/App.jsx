@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 import { ShoppingCart, Plus, Minus, Trash2, Loader2, X } from 'lucide-react';
@@ -91,7 +91,7 @@ function App() {
         const lista = querySnapshot.docs.map(doc => ({
           id: doc.id,
          ...doc.data(),
-          emFalta: doc.data().emFalta || false // PEGA O CAMPO EM FALTA
+          emFalta: doc.data().emFalta || false
         }));
         setProdutos(lista);
       } catch (error) {
@@ -111,7 +111,7 @@ function App() {
 
   // ABRE MODAL SE FOR PERSONALIZÁVEL, SENÃO ADICIONA DIRETO
   const adicionarCarrinho = (produto) => {
-    if (produto.emFalta) return; // BLOQUEIA SE TIVER EM FALTA
+    if (produto.emFalta) return;
 
     if (produto.personalizavel) {
       setModalProduto(produto);
@@ -132,14 +132,15 @@ function App() {
     });
   };
 
-  const calcularPrecoTotalModal = () => {
+  // FIX: useMemo pra forçar recalcular no mobile quando desmarca
+  const precoTotalModal = useMemo(() => {
     if (!modalProduto) return 0;
     const precoAdicionais = adicionaisSelecionados.reduce((total, add) => total + add.preco, 0);
     return modalProduto.preco + precoAdicionais;
-  };
+  }, [modalProduto, adicionaisSelecionados]);
 
   const adicionarProdutoPersonalizado = () => {
-    adicionarItemCarrinho(modalProduto, adicionaisSelecionados, calcularPrecoTotalModal());
+    adicionarItemCarrinho(modalProduto, adicionaisSelecionados, precoTotalModal);
     setModalProduto(null);
     setAdicionaisSelecionados([]);
   };
@@ -243,7 +244,7 @@ function App() {
     <div className="bg-gray-900 min-h-screen text-white">
       <header className="bg-gray-800 p-4 sticky top-0 z-10 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-3xl md:text-5xl font-black text-center text-white relative">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-center text-white relative">
             <span className="bg-gradient-to-b from-purple-400 to-purple-700 bg-clip-text text-transparent">Açai do Lé</span>
             <span className="absolute inset-0 text-purple-900 translate-y-1 translate-x-1 -z-10">Açai do Lé</span>
           </h1>
@@ -278,7 +279,6 @@ function App() {
           ))}
         </div>
 
-        {/* AQUI USA O PRODUTO CARD */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {produtosFiltrados.map(produto => (
             <ProdutoCard
@@ -290,7 +290,7 @@ function App() {
         </div>
       </div>
 
-      {/* MODAL DE ADICIONAIS - FIX MOBILE */}
+      {/* MODAL DE ADICIONAIS - FIX MOBILE DESMARCAR */}
       {modalProduto && (
         <div className="fixed inset-0 bg-black bg-opacity-70 z-30 flex items-center justify-center p-2 sm:p-4">
           <div className="bg-gray-800 w-full max-w-md rounded-lg shadow-xl flex flex-col max-h-">
@@ -329,7 +329,7 @@ function App() {
             <div className="p-3 border-t border-gray-700">
               <div className="flex justify-between items-center mb-3">
                 <span className="text-base">Total:</span>
-                <span className="text-xl font-bold text-green-400">R$ {calcularPrecoTotalModal().toFixed(2)}</span>
+                <span key={adicionaisSelecionados.length} className="text-xl font-bold text-green-400">R$ {precoTotalModal.toFixed(2)}</span>
               </div>
               <button
                 onClick={adicionarProdutoPersonalizado}
