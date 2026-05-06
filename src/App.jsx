@@ -302,24 +302,30 @@ function App() {
       <div className="p-4 overflow-y-auto">
         <img src={modalProduto.imagem} alt={modalProduto.nome} className="w-full h-40 object-cover rounded mb-4" />
         <p className="text-gray-400 text-sm mb-4">{modalProduto.descricao}</p>
-
-        <h3 className="font-bold text-lg mb-2 text-purple-400">Adicionais</h3>
-        <div className="space-y-2">
-          {modalProduto.adicionais.map((add, index) => (
-            <label key={index} className="flex items-center justify-between bg-gray-700 p-3 rounded cursor-pointer hover:bg-gray-600">
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={adicionaisSelecionados.some(a => a.nome === add.nome)}
-                  onChange={() => toggleAdicional(add)}
-                  className="w-5 h-5 accent-purple-500"
-                />
-                <span>{add.nome}</span>
-              </div>
-              <span className="text-green-400 font-semibold">+ R$ {add.preco.toFixed(2)}</span>
-            </label>
-          ))}
+<h3 className="font-bold text-lg mb-2 text-purple-400">Adicionais</h3>
+<div className="space-y-2">
+  {modalProduto.adicionais.map((add, index) => {
+    const selecionado = adicionaisSelecionados.some(a => a.nome === add.nome)
+    return (
+      <div 
+        key={index} 
+        onClick={() => toggleAdicional(add)}
+        className={`flex items-center justify-between bg-gray-700 p-3 rounded cursor-pointer active:bg-gray-600 ${selecionado ? 'ring-2 ring-purple-500' : ''}`}
+      >
+        <div className="flex items-center gap-3 pointer-events-none">
+          <input
+            type="checkbox"
+            checked={selecionado}
+            readOnly
+            className="w-5 h-5 accent-purple-500 pointer-events-none"
+          />
+          <span>{add.nome}</span>
         </div>
+        <span className="text-green-400 font-semibold">+ R$ {add.preco.toFixed(2)}</span>
+      </div>
+    )
+  })}
+</div>
       </div>
 
       <div className="p-4 border-t border-gray-700">
