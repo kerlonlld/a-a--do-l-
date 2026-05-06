@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 import { ShoppingCart, Plus, Minus, Trash2, Loader2, X } from 'lucide-react';
 
@@ -82,31 +82,29 @@ function App() {
     localStorage.setItem('carrinho', JSON.stringify(carrinho));
   }, [carrinho]);
 
-  // Busca produtos no Firebase
+  // Busca produtos no Firebase em tempo real
   useEffect(() => {
-    const buscarProdutos = async () => {
-      setLoading(true);
-      try {
-        const querySnapshot = await getDocs(collection(db, 'produtos'));
-        const lista = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-         ...doc.data(),
-          emFalta: doc.data().emFalta || false
-        }));
-        setProdutos(lista);
-      } catch (error) {
-        console.error("Erro ao buscar produtos: ", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    setLoading(true);
 
-    buscarProdutos();
+    const unsubscribe = onSnapshot(collection(db, 'produtos'), (querySnapshot) => {
+      const lista = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+      ...doc.data(),
+        emFalta: doc.data().emFalta || false
+      }));
+      setProdutos(lista);
+      setLoading(false);
+    }, (error) => {
+      console.error("Erro ao buscar produtos: ", error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const categorias = ['Todos',...new Set(produtos.map(p => p.categoria))];
   const produtosFiltrados = categoriaAtiva === 'Todos'
-   ? produtos
+  ? produtos
     : produtos.filter(p => p.categoria === categoriaAtiva);
 
   // ABRE MODAL SE FOR PERSONALIZÁVEL, SENÃO ADICIONA DIRETO
@@ -152,7 +150,7 @@ function App() {
       if (itemExistente) {
         return prev.map(item =>
           item.idUnico === idUnico
-           ? {...item, quantidade: item.quantidade + 1 }
+          ? {...item, quantidade: item.quantidade + 1 }
             : item
         );
       }
@@ -176,7 +174,7 @@ function App() {
       }
       return prev.map(item =>
         item.idUnico === idUnico
-         ? {...item, quantidade: item.quantidade - 1 }
+        ? {...item, quantidade: item.quantidade - 1 }
           : item
       );
     });
@@ -186,7 +184,7 @@ function App() {
     setCarrinho(prev =>
       prev.map(item =>
         item.idUnico === idUnico
-         ? {...item, quantidade: item.quantidade + 1 }
+        ? {...item, quantidade: item.quantidade + 1 }
           : item
       )
     );
@@ -270,7 +268,7 @@ function App() {
               onClick={() => setCategoriaAtiva(cat)}
               className={`px-4 py-2 rounded-full font-semibold transition ${
                 categoriaAtiva === cat
-                 ? 'bg-purple-500 text-black'
+                ? 'bg-purple-500 text-black'
                   : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
