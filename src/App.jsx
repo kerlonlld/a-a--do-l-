@@ -292,50 +292,29 @@ function App() {
 
       {/* MODAL DE ADICIONAIS */}
 {modalProduto && (
-  <div className="fixed inset-0 bg-black bg-opacity-70 z-30 flex items-center justify-center p-4">
-    <div className="bg-gray-800 w-full max-w-md rounded-lg shadow-xl flex flex-col max-h-[90vh]">
-      <div className="flex justify-between items-center p-4 border-b border-gray-700">
-        <h2 className="text-xl font-bold">{modalProduto.nome}</h2>
-        <button onClick={() => setModalProduto(null)}><X size={24} /></button>
+  <div className="fixed inset-0 bg-black bg-opacity-70 z-30 flex items-center justify-center p-2 sm:p-4">
+    <div className="bg-gray-800 w-full max-w-md rounded-lg shadow-xl flex flex-col max-h-[95vh]">
+      <div className="flex justify-between items-center p-3 border-b border-gray-700">
+        <h2 className="text-lg font-bold">{modalProduto.nome}</h2>
+        <button onClick={() => setModalProduto(null)}><X size={20} /></button>
       </div>
 
-      <div className="p-4 overflow-y-auto">
-        <img src={modalProduto.imagem} alt={modalProduto.nome} className="w-full h-40 object-cover rounded mb-4" />
-        <p className="text-gray-400 text-sm mb-4">{modalProduto.descricao}</p>
-<h3 className="font-bold text-lg mb-2 text-purple-400">Adicionais</h3>
-<div className="space-y-2">
-  {modalProduto.adicionais.map((add, index) => {
-    const selecionado = adicionaisSelecionados.some(a => a.nome === add.nome)
-    return (
-      <div 
-        key={index} 
-        onClick={() => toggleAdicional(add)}
-        className={`flex items-center justify-between bg-gray-700 p-3 rounded cursor-pointer active:bg-gray-600 ${selecionado ? 'ring-2 ring-purple-500' : ''}`}
-      >
-        <div className="flex items-center gap-3 pointer-events-none">
-          <input
-            type="checkbox"
-            checked={selecionado}
-            readOnly
-            className="w-5 h-5 accent-purple-500 pointer-events-none"
-          />
-          <span>{add.nome}</span>
-        </div>
-        <span className="text-green-400 font-semibold">+ R$ {add.preco.toFixed(2)}</span>
-      </div>
-    )
-  })}
-</div>
+      <div className="p-3 overflow-y-auto">
+        <img src={modalProduto.imagem} alt={modalProduto.nome} className="w-full h-32 sm:h-40 object-cover rounded mb-3" />
+        <p className="text-gray-400 text-xs sm:text-sm mb-3">{modalProduto.descricao}</p>
+
+        <h3 className="font-bold text-base mb-2 text-purple-400">Adicionais</h3>
+        //... código dos adicionais de cima aqui...
       </div>
 
-      <div className="p-4 border-t border-gray-700">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-lg">Total:</span>
-          <span className="text-2xl font-bold text-green-400">R$ {calcularPrecoTotalModal().toFixed(2)}</span>
+      <div className="p-3 border-t border-gray-700">
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-base">Total:</span>
+          <span className="text-xl font-bold text-green-400">R$ {calcularPrecoTotalModal().toFixed(2)}</span>
         </div>
         <button
           onClick={adicionarProdutoPersonalizado}
-          className="w-full bg-yellow-500 text-black p-3 rounded-lg font-bold hover:bg-yellow-400 transition-colors"
+          className="w-full bg-yellow-500 text-black p-3 rounded-lg font-bold hover:bg-yellow-400 active:bg-yellow-600"
         >
           Adicionar ao Carrinho
         </button>
