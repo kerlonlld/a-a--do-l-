@@ -3,6 +3,8 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 import { ShoppingCart, Plus, Minus, Trash2, Loader2, X } from 'lucide-react';
 
+const TAXA_ENTREGA = 1; // <- TAXA FIXA DE 1 REAL
+
 // COMPONENTE DO CARD COM ESGOTADO
 const ProdutoCard = ({ produto, onAdd }) => {
   const emFalta = produto.emFalta || false;
@@ -84,14 +86,16 @@ function App() {
 
   // Busca produtos no Firebase em tempo real
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
     const unsubscribe = onSnapshot(collection(db, 'produtos'), (querySnapshot) => {
       const lista = querySnapshot.docs.map(doc => ({
         id: doc.id,
-      ...doc.data(),
+       ...doc.data(),
         emFalta: doc.data().emFalta || false
       }));
+      console.log('Produtos do Firebase:', lista);
       setProdutos(lista);
       setLoading(false);
     }, (error) => {
@@ -104,7 +108,7 @@ function App() {
 
   const categorias = ['Todos',...new Set(produtos.map(p => p.categoria))];
   const produtosFiltrados = categoriaAtiva === 'Todos'
-  ? produtos
+   ? produtos
     : produtos.filter(p => p.categoria === categoriaAtiva);
 
   // ABRE MODAL SE FOR PERSONALIZÁVEL, SENÃO ADICIONA DIRETO
@@ -150,7 +154,7 @@ function App() {
       if (itemExistente) {
         return prev.map(item =>
           item.idUnico === idUnico
-          ? {...item, quantidade: item.quantidade + 1 }
+           ? {...item, quantidade: item.quantidade + 1 }
             : item
         );
       }
@@ -174,7 +178,7 @@ function App() {
       }
       return prev.map(item =>
         item.idUnico === idUnico
-        ? {...item, quantidade: item.quantidade - 1 }
+         ? {...item, quantidade: item.quantidade - 1 }
           : item
       );
     });
@@ -184,7 +188,7 @@ function App() {
     setCarrinho(prev =>
       prev.map(item =>
         item.idUnico === idUnico
-        ? {...item, quantidade: item.quantidade + 1 }
+         ? {...item, quantidade: item.quantidade + 1 }
           : item
       )
     );
@@ -194,7 +198,8 @@ function App() {
     setCarrinho(prev => prev.filter(item => item.idUnico!== idUnico));
   };
 
-  const totalCarrinho = carrinho.reduce((total, item) => total + item.precoFinal * item.quantidade, 0);
+  const subtotalCarrinho = carrinho.reduce((total, item) => total + item.precoFinal * item.quantidade, 0);
+  const totalCarrinho = carrinho.length > 0? subtotalCarrinho + TAXA_ENTREGA : 0;
   const totalItens = carrinho.reduce((total, item) => total + item.quantidade, 0);
 
   const finalizarPedido = () => {
@@ -213,6 +218,8 @@ function App() {
       }
     });
 
+    mensagem += `\n*Subtotal: R$ ${subtotalCarrinho.toFixed(2)}*`;
+    mensagem += `\n*Taxa de Entrega: R$ ${TAXA_ENTREGA.toFixed(2)}*`;
     mensagem += `\n*Total: R$ ${totalCarrinho.toFixed(2)}*`;
 
     const urlWhatsApp = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
@@ -268,7 +275,7 @@ function App() {
               onClick={() => setCategoriaAtiva(cat)}
               className={`px-4 py-2 rounded-full font-semibold transition ${
                 categoriaAtiva === cat
-                ? 'bg-purple-500 text-black'
+                 ? 'bg-purple-500 text-black'
                   : 'bg-gray-700 hover:bg-gray-600'
               }`}
             >
@@ -291,7 +298,7 @@ function App() {
       {/* MODAL DE ADICIONAIS - FIX MOBILE DESMARCAR */}
       {modalProduto && (
         <div className="fixed inset-0 bg-black bg-opacity-70 z-30 flex items-center justify-center p-2 sm:p-4">
-          <div className="bg-gray-800 w-full max-w-md rounded-lg shadow-xl flex flex-col max-h-">
+          <div className="bg-gray-800 w-full max-w-md rounded-lg shadow-xl flex flex-col max-h-[90vh]">
             <div className="flex justify-between items-center p-3 border-b border-gray-700">
               <h2 className="text-lg font-bold">{modalProduto.nome}</h2>
               <button onClick={() => setModalProduto(null)}><X size={20} /></button>
@@ -391,6 +398,14 @@ function App() {
                 </div>
 
                 <div className="p-4 border-t border-gray-700">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-400">Subtotal:</span>
+                    <span className="text-gray-400">R$ {subtotalCarrinho.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mb-3">
+                    <span className="text-gray-400">Taxa de Entrega:</span>
+                    <span className="text-gray-400">R$ {TAXA_ENTREGA.toFixed(2)}</span>
+                  </div>
                   <div className="flex justify-between text-xl font-bold mb-4">
                     <span>Total:</span>
                     <span>R$ {totalCarrinho.toFixed(2)}</span>
@@ -444,6 +459,14 @@ function App() {
                 </div>
 
                 <div className="p-4 border-t border-gray-700">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-400">Subtotal:</span>
+                    <span className="text-gray-400">R$ {subtotalCarrinho.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mb-3">
+                    <span className="text-gray-400">Taxa de Entrega:</span>
+                    <span className="text-gray-400">R$ {TAXA_ENTREGA.toFixed(2)}</span>
+                  </div>
                   <div className="flex justify-between text-xl font-bold mb-4">
                     <span>Total:</span>
                     <span>R$ {totalCarrinho.toFixed(2)}</span>
