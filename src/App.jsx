@@ -203,7 +203,11 @@ function App() {
   const totalItens = carrinho.reduce((total, item) => total + item.quantidade, 0);
 
   const finalizarPedido = () => {
-    const numeroWhatsApp = "5538998210980";
+    const numeroWhatsApp = import.meta.env.VITE_WHATSAPP_NUMBER;
+    if (!numeroWhatsApp) {
+      alert('Número do WhatsApp não configurado. Verifique o arquivo .env.');
+      return;
+    }
 
     let mensagem = `*NOVO PEDIDO*\n\n`;
     mensagem += `*Cliente:* ${dadosCliente.nome}\n`;
