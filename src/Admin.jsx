@@ -20,7 +20,7 @@ function Admin() {
   });
   const [novoAdicional, setNovoAdicional] = useState({ nome: '', preco: '' });
 
-  const SENHA_ADMIN = "";
+  const SENHA_ADMIN = import.meta.env.VITE_ADMIN_PASSWORD;
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/immutability
@@ -40,6 +40,11 @@ function Admin() {
 
   const fazerLogin = (e) => {
     e.preventDefault();
+    if (!SENHA_ADMIN) {
+      alert('Senha de administrador não configurada. Verifique o arquivo .env.');
+      return;
+    }
+
     if (senha === SENHA_ADMIN) {
       setLogado(true);
       sessionStorage.setItem('adminLogado', 'true');
